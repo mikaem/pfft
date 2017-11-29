@@ -14,7 +14,7 @@ int main(int argc, char **argv)
   int np[2], inplace, loops;
   ptrdiff_t n[3];
   unsigned opt, tune, destroy_input;
-  
+
   /* Set size of FFT and process mesh */
   n[0] = 29; n[1] = 27; n[2] = 31;
   np[0] = 2; np[1] = 2;
@@ -23,7 +23,7 @@ int main(int argc, char **argv)
   tune    = PFFT_NO_TUNE;
   destroy_input = PFFT_PRESERVE_INPUT;
   loops   = 1;
-  
+
   /* Initialize MPI and PFFT */
   MPI_Init(&argc, &argv);
   pfft_init();
@@ -35,7 +35,7 @@ int main(int argc, char **argv)
 
   MPI_Finalize();
   return 0;
-} 
+}
 
 
 static void measure_pfft(
@@ -56,7 +56,7 @@ static void measure_pfft(
     pfft_fprintf(comm, stderr, "Error: This test file only works with %d processes.\n", np[0]*np[1]);
     return;
   }
-  
+
   /* Get parameters of data distribution */
   alloc_local = pfft_local_size_dft_3d(n, comm_cart_2d, PFFT_TRANSPOSED_OUT,
       local_ni, local_i_start, local_no, local_o_start);
@@ -70,7 +70,7 @@ static void measure_pfft(
   plan_forw = pfft_plan_dft_3d(
       n, in, out, comm_cart_2d, PFFT_FORWARD, PFFT_TRANSPOSED_OUT| pfft_opt_flags);
   timer[0] += MPI_Wtime();
-  
+
   /* Plan parallel backward FFT */
   timer[1] = -MPI_Wtime();
   plan_back = pfft_plan_dft_3d(
@@ -95,13 +95,13 @@ static void measure_pfft(
     /* clear the old input */
     pfft_clear_input_complex_3d(n, local_ni, local_i_start,
         in);
-    
+
     /* execute parallel backward FFT */
     MPI_Barrier(MPI_COMM_WORLD);
     timer[3] -= MPI_Wtime();
     pfft_execute(plan_back);
     timer[3] += MPI_Wtime();
-    
+
     /* Scale data */
     for(ptrdiff_t l=0; l < local_ni[0] * local_ni[1] * local_ni[2]; l++)
       in[l] /= (n[0]*n[1]*n[2]);
@@ -148,7 +148,7 @@ static void measure_pfft(
     pfft_printf(comm_cart_2d, "in-place");
   else
     pfft_printf(comm_cart_2d, "out-of-place");
-  pfft_printf(comm_cart_2d, " forward and backward trafo of size n=(%td, %td, %td):\n", n[0], n[1], n[2]); 
+  pfft_printf(comm_cart_2d, " forward and backward trafo of size n=(%td, %td, %td):\n", n[0], n[1], n[2]);
 
   MPI_Reduce(&timer, &max_timer, 4, MPI_DOUBLE, MPI_MAX, 0, comm_cart_2d);
   pfft_printf(comm_cart_2d, "tune_forw = %6.2e; tune_back = %6.2e, exec_forw = %6.2e, exec_back = %6.2e, error = %6.2e\n", max_timer[0], max_timer[1], max_timer[2], max_timer[3], err);
@@ -164,7 +164,7 @@ static void measure_pfft(
 static void init_parameters(
     int argc, char **argv,
     ptrdiff_t *n, int *np, int *loops, int *inplace,
-    unsigned *opt_flag, unsigned *tune_flag, unsigned *destroy_input_flag 
+    unsigned *opt_flag, unsigned *tune_flag, unsigned *destroy_input_flag
     )
 {
   int opt=0, tune=0, destroy_input=0;

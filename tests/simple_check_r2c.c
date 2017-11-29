@@ -12,11 +12,12 @@ int main(int argc, char **argv)
   pfft_complex *out;
   pfft_plan plan_forw=NULL, plan_back=NULL;
   MPI_Comm comm_cart_2d;
-  
+  double t0, t1;
+
   /* Set size of FFT and process mesh */
-  n[0] = 29; n[1] = 27; n[2] = 32;
+  n[0] = 128; n[1] = 128; n[2] = 128;
   np[0] = 2; np[1] = 2;
-  
+
   /* Initialize MPI and PFFT */
   MPI_Init(&argc, &argv);
   pfft_init();
@@ -27,7 +28,7 @@ int main(int argc, char **argv)
     MPI_Finalize();
     return 1;
   }
-  
+
   /* Get parameters of data distribution */
   alloc_local = pfft_local_size_dft_r2c_3d(n, comm_cart_2d, PFFT_TRANSPOSED_NONE,
       local_ni, local_i_start, local_no, local_o_start);
@@ -39,7 +40,7 @@ int main(int argc, char **argv)
   /* Plan parallel forward FFT */
   plan_forw = pfft_plan_dft_r2c_3d(
       n, in, out, comm_cart_2d, PFFT_FORWARD, PFFT_TRANSPOSED_NONE| PFFT_MEASURE| PFFT_DESTROY_INPUT);
-  
+
   /* Plan parallel backward FFT */
   plan_back = pfft_plan_dft_c2r_3d(
       n, out, in, comm_cart_2d, PFFT_BACKWARD, PFFT_TRANSPOSED_NONE| PFFT_MEASURE| PFFT_DESTROY_INPUT);
@@ -48,26 +49,36 @@ int main(int argc, char **argv)
   pfft_init_input_real(3, n, local_ni, local_i_start,
       in);
 
-  /* execute parallel forward FFT */
   pfft_execute(plan_forw);
+  pfft_execute(plan_back);
+  for(ptrdiff_t l=0; l < local_ni[0] * local_ni[1] * local_ni[2]; l++)
+    in[l] /= (n[0]*n[1]*n[2]);
+
+  /* execute parallel forward FFT */
+  t0 = MPI_Wtime();
+  pfft_execute(plan_forw);
+  t0 = MPI_Wtime()-t0;
 
   /* clear the old input */
   pfft_clear_input_real(3, n, local_ni, local_i_start,
       in);
-  
+
   /* execute parallel backward FFT */
+  t1 = MPI_Wtime();
   pfft_execute(plan_back);
-  
+  t1 = MPI_Wtime()-t1;
+
   /* Scale data */
   for(ptrdiff_t l=0; l < local_ni[0] * local_ni[1] * local_ni[2]; l++)
     in[l] /= (n[0]*n[1]*n[2]);
-  
+
   /* Print error of back transformed data */
   MPI_Barrier(MPI_COMM_WORLD);
   err = pfft_check_output_real(3, n, local_ni, local_i_start, in, comm_cart_2d);
-  pfft_printf(comm_cart_2d, "Error after one forward and backward trafo of size n=(%td, %td, %td):\n", n[0], n[1], n[2]); 
+  pfft_printf(comm_cart_2d, "Error after one forward and backward trafo of size n=(%td, %td, %td):\n", n[0], n[1], n[2]);
   pfft_printf(comm_cart_2d, "maxerror = %6.2e;\n", err);
-  
+  pfft_printf(comm_cart_2d, "Time = %6.2e %6.2e;\n", t0, t1);
+
   /* free mem and finalize */
   pfft_destroy_plan(plan_forw);
   pfft_destroy_plan(plan_back);

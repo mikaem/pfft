@@ -1,5 +1,5 @@
 # Subdirectories
-SUBDIRS = 
+SUBDIRS =
 
 # Enable Fortran subdirectory only on request and only for double precision.
 if ENABLE_FORTRAN
@@ -35,7 +35,7 @@ EXTRA_DIST += $(manual_FILES)
 
 
 # These programs are built by 'make check' and may be tested afterwards.
-check_PROGRAMS = 
+check_PROGRAMS =
 
 if SINGLE
 check_PROGRAMS += \
@@ -111,6 +111,7 @@ check_PROGRAMS += \
 check_PROGRAMS += \
 	bench_c2c \
 	time_c2c \
-	time_c2c_transposed
+	time_c2c_transposed \
+	time_r2c_transposed
 endif
 

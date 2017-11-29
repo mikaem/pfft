@@ -22,8 +22,8 @@
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 ################################################################################
-# NOTE: If you just want to build PFFT, do not use this file. Just follow the 
-# installation instructions as described in the tutorial found under 
+# NOTE: If you just want to build PFFT, do not use this file. Just follow the
+# installation instructions as described in the tutorial found under
 # doc/tutorial.
 #
 # This file is based on the bootstrap.sh script from NFFT 3.2 by Jens Keiner,
@@ -32,7 +32,7 @@
 ################################################################################
 
 # alias to allow for systems having glibtoolize
-alias libtoolize=$(type -p glibtoolize libtoolize | head -1)
+#alias libtoolize=$(type -p glibtoolize libtoolize | head -1)
 
 touch ChangeLog
 
@@ -54,7 +54,7 @@ else
 @@ -102,6 +102,12 @@
     depmode=msvc7
  fi
- 
+
 +if test "$depmode" = xlc; then
 +   # IBM C/C++ Compilers xlc/xlC can output gcc-like dependency informations.
 +   gccflag=-qmakedep=gcc,-MF
@@ -67,7 +67,7 @@ else
 @@ -226,6 +232,13 @@
    rm -f "$tmpdepfile"
    ;;
- 
+
 +xlc)
 +  # This case exists only to let depend.m4 do its work.  It works by
 +  # looking at the text of this script.  This case will never be run,
