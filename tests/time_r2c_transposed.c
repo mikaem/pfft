@@ -111,7 +111,7 @@ static void measure_pfft(
         in);
 
     /* execute parallel backward FFT */
-    MPI_Barrier(MPI_COMM_WORLD);
+    //MPI_Barrier(MPI_COMM_WORLD);
     timer[3] -= MPI_Wtime();
     pfft_execute(plan_back);
     timer[3] += MPI_Wtime();
@@ -119,9 +119,14 @@ static void measure_pfft(
     tt[t] = MPI_Wtime() - tt[t];
 
     /* Print pfft timer */
-    pfft_print_average_timer_adv(plan_forw, comm_cart_2d);
-    pfft_print_average_timer_adv(plan_back, comm_cart_2d);
-
+    //pfft_print_average_timer_adv(plan_forw, comm_cart_2d);
+    //pfft_print_average_timer_adv(plan_back, comm_cart_2d);
+    
+    // MM
+    // Here I create timers corresponding to the ones in r2c_guru_pencil.c
+    // Timers are provided by pfft. I think they correspond as shown below
+    // Uncheck pfft_print_average_timer_adv above to see more details.
+    // Should check timers more in detail.
     mytimer = pfft_get_timer(plan_forw);
     myt = pfft_convert_timer2vec(mytimer);
     tf[0][t] = myt[7];
@@ -138,6 +143,7 @@ static void measure_pfft(
     tb[3][t] = myt[14];
     tb[4][t] = myt[10];
 
+    // Resetting timers each step
     pfft_reset_timer(plan_forw);
     pfft_reset_timer(plan_back);
 
